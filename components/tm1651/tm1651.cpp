@@ -12,7 +12,7 @@ static const bool LINE_LOW   = false;
 
 // TM1651 maximum frequency is 450 kHz
 // use conservative clock cycle in microseconds
-static const uint8_t CLOCK_CYCLE           = 12;
+static const uint8_t CLOCK_CYCLE           = 20;
 static const uint8_t HALF_CLOCK_CYCLE      = CLOCK_CYCLE / 2;
 static const uint8_t QUARTER_CLOCK_CYCLE   = CLOCK_CYCLE / 4;
 
@@ -189,14 +189,12 @@ bool TM1651Display::half_cycle_clock_high_ack() {
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
   bool ack = this->dio_pin_->digital_read();
 
-  // ack (DIO) should be low
+  // DIO should be low, ack = false
   // now set DIO to low before data line
   // releases at the next clock cycle
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
-  if (!ack) {
-    ESP_LOGD(TAG, "no ack");
-    this->dio_pin_->digital_write(LINE_LOW);
-  }
+  if (!ack) this->dio_pin_->digital_write(LINE_LOW);
+
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
   // set CLK to low again to begin the next cycle
   this->clk_pin_->digital_write(LINE_LOW);
@@ -242,7 +240,7 @@ bool TM1651Display::write_byte(uint8_t data) {
   // DIO set high, giving an ack by pulling DIO low
   // set CLK low, DIO high
   this->half_cycle_clock_low(LINE_HIGH);
-  // return true if the ACK low
+  // return true if ack low
   return !this->half_cycle_clock_high_ack();
 }
 
