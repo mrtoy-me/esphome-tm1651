@@ -21,8 +21,8 @@ static const uint8_t ADDR_FIXED            = 0x44; // fixed address mode
 static const uint8_t ADDR_START            = 0xC0; // address of the display register
 static const uint8_t FRAME_START           = 0xC1;
 
-static const uint8_t DISPLAY_OFF_MASK      = 0xF7; // bit 3 off
-static const uint8_t DISPLAY_ON_MASK       = 0x88; // bit 3 on
+static const uint8_t DISPLAY_OFF      = 0x80; // bit 3 off
+static const uint8_t DISPLAY_ON       = 0x88; // bit 3 on
 
 static const uint8_t TM1651_MAX_LEVEL      = 7;
 
@@ -53,11 +53,11 @@ void TM1651Display::setup() {
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
   // initialise brightness to TYPICAL
-  this->brightness_control_ = DISPLAY_ON_MASK | HARDWARE_BRIGHTNESS_TYPICAL;
+  this->brightness_control_ = HARDWARE_BRIGHTNESS_TYPICAL;
 
   // clear display
   this->display_level(0);
-  this->write_brightness();
+  this->write_brightness(DISPLAY_ON | this->brightness_control_);
   this->frame(false);
 }
 
@@ -68,42 +68,41 @@ void TM1651Display::dump_config() {
 }
 
 void TM1651Display::set_brightness(uint8_t new_brightness) {
-  this->brightness_control_ = DISPLAY_ON_MASK | this->calculate_brightness(new_brightness);
-  this->write_brightness();
+  this->brightness_control_ = this->calculate_brightness(new_brightness);
+  if (this->display_on) this->write_brightness(DISPLAY_ON);
   //this->repaint();
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
   if (new_level > TM1651_MAX_LEVEL) new_level = TM1651_MAX_LEVEL;
   this->level_ = new_level;
-  this->display_level(this->level_);
+  if (this->display_on) this->display_level(this->level_);
   //this->repaint();
 }
 
 void TM1651Display::set_level_percent(uint8_t percentage) {
   this->level_ = this->calculate_level(percentage);
-  this->display_level(this->level_);
+  if (this->display_on) this->display_level(this->level_);
   //this->repaint();
 }
 
 void TM1651Display::turn_off() {
-  this->is_on_ = false;
-  this->brightness_control_ =  DISPLAY_OFF_MASK & this->brightness_control_;
-  this->write_brightness();
+  this->display_on_ = false;
+  this->write_brightness(DISPLAY_OFF);
   //this->display_level(0);
 }
 
 void TM1651Display::turn_on() {
-  this->is_on_ = true;
-  this->brightness_control_ =  DISPLAY_ON_MASK | this->brightness_control_;
-  this->write_brightness();
+  this->display_on_ = true;
+  this->display_level(this->level_);
+  this->write_brightness(DISPLAY_ON);
  //this->repaint();
 }
 
 
 // protected
 
-uint8_t TM1651Display::calculate_brightness(uint8_t new_brightness) {
+TM1651Brightness TM1651Display::calculate_brightness(uint8_t new_brightness) {
   if (new_brightness <= 1) return HARDWARE_BRIGHTNESS_DARKEST;
   if (new_brightness == 2) return HARDWARE_BRIGHTNESS_TYPICAL;
 
@@ -154,14 +153,14 @@ void TM1651Display::frame(bool state) {
   // this->stop();
 }
 
-void TM1651Display::write_brightness() {
+void TM1651Display::write_brightness(uint8_t control) {
   this->start();
-  this->write_byte(this->brightness_control_);
+  this->write_byte(control | this->brightness_control_);
   this->stop();
 }
 
 void TM1651Display::repaint() {
-  if (!this->is_on_) return;
+  if (!this->display_on_) return;
   this->display_level(this->level_);
 }
 

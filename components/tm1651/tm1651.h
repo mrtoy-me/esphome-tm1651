@@ -38,7 +38,7 @@ class TM1651Display : public Component {
   void frame(bool state);
 
   void repaint();
-  void write_brightness();
+  void write_brightness(uint8_t control);
 
   // low level functions
   void delineate_transmission(bool dio_state);
@@ -51,7 +51,7 @@ class TM1651Display : public Component {
 
   bool write_byte(uint8_t data);
 
-  bool is_on_{true};
+  bool display_on_{true};
 
   InternalGPIOPin* clk_pin_;
   InternalGPIOPin* dio_pin_;
