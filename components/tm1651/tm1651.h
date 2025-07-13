@@ -38,6 +38,7 @@ class TM1651Display : public Component {
   void frame(bool state);
 
   void repaint();
+  void write_brightness();
 
   // low level functions
   void delineate_transmission(bool dio_state);
