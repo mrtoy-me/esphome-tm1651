@@ -69,20 +69,20 @@ void TM1651Display::dump_config() {
 
 void TM1651Display::set_brightness(uint8_t new_brightness) {
   this->brightness_control_ = this->calculate_brightness(new_brightness);
-  if (this->display_on) this->write_brightness(DISPLAY_ON);
+  if (this->display_on_) this->write_brightness(DISPLAY_ON);
   //this->repaint();
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
   if (new_level > TM1651_MAX_LEVEL) new_level = TM1651_MAX_LEVEL;
   this->level_ = new_level;
-  if (this->display_on) this->display_level(this->level_);
+  if (this->display_on_) this->display_level(this->level_);
   //this->repaint();
 }
 
 void TM1651Display::set_level_percent(uint8_t percentage) {
   this->level_ = this->calculate_level(percentage);
-  if (this->display_on) this->display_level(this->level_);
+  if (this->display_on_) this->display_level(this->level_);
   //this->repaint();
 }
 
@@ -102,7 +102,7 @@ void TM1651Display::turn_on() {
 
 // protected
 
-TM1651Brightness TM1651Display::calculate_brightness(uint8_t new_brightness) {
+uint8_t TM1651Display::calculate_brightness(uint8_t new_brightness) {
   if (new_brightness <= 1) return HARDWARE_BRIGHTNESS_DARKEST;
   if (new_brightness == 2) return HARDWARE_BRIGHTNESS_TYPICAL;
 
