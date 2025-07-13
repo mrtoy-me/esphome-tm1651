@@ -56,7 +56,7 @@ void TM1651Display::setup() {
   this->brightness_ = HARDWARE_BRIGHTNESS_TYPICAL;
 
   // clear display
-  this->set_level(0);
+  this->write_level();
   this->write_brightness(DISPLAY_ON);
   this->frame(false);
 }
