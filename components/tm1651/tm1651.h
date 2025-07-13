@@ -34,10 +34,9 @@ class TM1651Display : public Component {
   uint8_t calculate_brightness(uint8_t new_brightness);
   uint8_t calculate_level(uint8_t percentage);
 
-  void display_level(uint8_t level);
+  void write_level();
   void frame(bool state);
 
-  void repaint();
   void write_brightness(uint8_t control);
 
   // low level functions
@@ -51,13 +50,13 @@ class TM1651Display : public Component {
 
   bool write_byte(uint8_t data);
 
-  bool display_on_{true};
-
   InternalGPIOPin* clk_pin_;
   InternalGPIOPin* dio_pin_;
 
-  uint8_t brightness_control_;
-  uint8_t level_;
+  bool display_on_{true};
+
+  uint8_t brightness_{};
+  uint8_t level_{0};
 };
 
 template<typename... Ts> class SetLevelPercentAction : public Action<Ts...>, public Parented<TM1651Display> {

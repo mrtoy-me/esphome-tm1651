@@ -53,11 +53,11 @@ void TM1651Display::setup() {
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
   // initialise brightness to TYPICAL
-  this->brightness_control_ = HARDWARE_BRIGHTNESS_TYPICAL;
+  this->brightness_ = HARDWARE_BRIGHTNESS_TYPICAL;
 
   // clear display
-  this->display_level(0);
-  this->write_brightness(DISPLAY_ON | this->brightness_control_);
+  this->set_level();
+  this->write_brightness(DISPLAY_ON);
   this->frame(false);
 }
 
@@ -68,35 +68,30 @@ void TM1651Display::dump_config() {
 }
 
 void TM1651Display::set_brightness(uint8_t new_brightness) {
-  this->brightness_control_ = this->calculate_brightness(new_brightness);
+  this->brightness_ = this->calculate_brightness(new_brightness);
   if (this->display_on_) this->write_brightness(DISPLAY_ON);
-  //this->repaint();
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
   if (new_level > TM1651_MAX_LEVEL) new_level = TM1651_MAX_LEVEL;
   this->level_ = new_level;
-  if (this->display_on_) this->display_level(this->level_);
-  //this->repaint();
+  if (this->display_on_) this->write_level();
 }
 
 void TM1651Display::set_level_percent(uint8_t percentage) {
   this->level_ = this->calculate_level(percentage);
-  if (this->display_on_) this->display_level(this->level_);
-  //this->repaint();
+  if (this->display_on_) this->write_level();
 }
 
 void TM1651Display::turn_off() {
   this->display_on_ = false;
   this->write_brightness(DISPLAY_OFF);
-  //this->display_level(0);
 }
 
 void TM1651Display::turn_on() {
   this->display_on_ = true;
-  this->display_level(this->level_);
+  this->write_level();
   this->write_brightness(DISPLAY_ON);
- //this->repaint();
 }
 
 
@@ -119,14 +114,14 @@ uint8_t TM1651Display::calculate_level(uint8_t percentage) {
   return (uint8_t)(initial_scaling / MAX_PERCENT);
 }
 
-void TM1651Display::display_level(uint8_t level) {
+void TM1651Display::write_level() {
   this->start();
-  if (!this->write_byte(ADDR_FIXED)) ESP_LOGD(TAG, "  Ack not received");;
+  if (!this->write_byte(ADDR_FIXED)) ESP_LOGD(TAG, "  Ack not received");
   this->stop();
 
   this->start();
   if (!this->write_byte(ADDR_START)) ESP_LOGD(TAG, "  Ack not received");
-  if (!this->write_byte(TM1651_LEVEL_TAB[level])) ESP_LOGD(TAG, "  Ack not received");
+  if (!this->write_byte(TM1651_LEVEL_TAB[this->level_])) ESP_LOGD(TAG, "  Ack not received");
   this->stop();
 
   // this->start();
@@ -155,15 +150,9 @@ void TM1651Display::frame(bool state) {
 
 void TM1651Display::write_brightness(uint8_t control) {
   this->start();
-  this->write_byte(control | this->brightness_control_);
+  this->write_byte(control | this->brightness_);
   this->stop();
 }
-
-void TM1651Display::repaint() {
-  if (!this->display_on_) return;
-  this->display_level(this->level_);
-}
-
 
 // low level functions
 
