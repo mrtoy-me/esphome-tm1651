@@ -10,38 +10,40 @@ static const char *const TAG = "tm1651.display";
 static const bool LINE_HIGH  = true;
 static const bool LINE_LOW   = false;
 
-// TM1651 maximum frequency is 450 kHz
-// use conservative clock cycle in microseconds
-static const uint8_t CLOCK_CYCLE           = 8;
-static const uint8_t HALF_CLOCK_CYCLE      = CLOCK_CYCLE / 2;
-static const uint8_t QUARTER_CLOCK_CYCLE   = CLOCK_CYCLE / 4;
+// TM1651 maximum frequency is ~450 kHz
+// choose clock cycle in microseconds
+static const uint8_t CLOCK_CYCLE                = 8;
 
-static const uint8_t ADDR_AUTO             = 0x40;
-static const uint8_t ADDR_FIXED            = 0x44; // fixed address mode
-static const uint8_t ADDR_START            = 0xC0; // address of the display register
-static const uint8_t FRAME_START           = 0xC1;
+static const uint8_t HALF_CLOCK_CYCLE            = CLOCK_CYCLE / 2;
+static const uint8_t QUARTER_CLOCK_CYCLE         = CLOCK_CYCLE / 4;
 
-static const uint8_t DISPLAY_OFF           = 0x80; // bit 3 off
-static const uint8_t DISPLAY_ON            = 0x88; // bit 3 on
+static const uint8_t ADDR_AUTO                   = 0x40;
+static const uint8_t ADDR_FIXED                  = 0x44; // fixed address mode
+static const uint8_t ADDR_START                  = 0xC0; // address of the display register
+static const uint8_t FRAME_START                 = 0xC1;
 
-static const uint8_t TM1651_MAX_LEVEL      = 7;
+static const uint8_t DISPLAY_OFF                 = 0x80;
+static const uint8_t DISPLAY_ON                  = 0x88;
 
-static const uint8_t MAX_PERCENT           = 100;
-static const uint8_t HALF_MAX_PERCENT      = MAX_PERCENT / 2;
+static const uint8_t MAX_PERCENT                 = 100;
+static const uint8_t HALF_MAX_PERCENT            = MAX_PERCENT / 2;
 
-// tm1651 chip brightness values
-static const uint8_t HARDWARE_BRIGHTNESS_DARKEST   = 0;
-static const uint8_t HARDWARE_BRIGHTNESS_TYPICAL   = 2;
-static const uint8_t HARDWARE_BRIGHTNESS_BRIGHTEST = 7;
 
-static const uint8_t TM1651_LEVEL_TAB[]     = { 0b00000000,
-                                                0b00000001,
-                                                0b00000011,
-                                                0b00000111,
-                                                0b00001111,
-                                                0b00011111,
-                                                0b00111111,
-                                                0b01111111 };
+static const uint8_t TM1651_MAX_LEVEL            = 7;
+
+static const uint8_t TM1651_BRIGHTNESS_DARKEST   = 0;
+static const uint8_t TM1651_BRIGHTNESS_TYPICAL   = 2;
+static const uint8_t TM1651_BRIGHTNESS_BRIGHTEST = 7;
+
+static const uint8_t TM1651_LEVEL_TAB[]          = { 0b00000000,
+                                                     0b00000001,
+                                                     0b00000011,
+                                                     0b00000111,
+                                                     0b00001111,
+                                                     0b00011111,
+                                                     0b00111111,
+                                                     0b01111111 };
+
 
 // public
 
