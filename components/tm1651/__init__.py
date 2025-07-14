@@ -10,19 +10,21 @@ from esphome.const import (
     CONF_LEVEL,
 )
 
-CODEOWNERS = ["@mrtoy-me", "@freekode"]
+CODEOWNERS = ["@mrtoy-me"]
+
+CONF_LEVEL_PERCENT = "level_percent"
 
 tm1651_ns = cg.esphome_ns.namespace("tm1651")
 TM1651Brightness = tm1651_ns.enum("TM1651Brightness")
 TM1651Display = tm1651_ns.class_("TM1651Display", cg.Component)
 
-SetLevelPercentAction = tm1651_ns.class_("SetLevelPercentAction", automation.Action)
-SetLevelAction = tm1651_ns.class_("SetLevelAction", automation.Action)
 SetBrightnessAction = tm1651_ns.class_("SetBrightnessAction", automation.Action)
+SetLevelAction = tm1651_ns.class_("SetLevelAction", automation.Action)
+SetLevelPercentAction = tm1651_ns.class_("SetLevelPercentAction", automation.Action)
+FrameOnAction = tm1651_ns.class_("FrameOnAction", automation.Action)
+FrameOffAction = tm1651_ns.class_("FrameOffAction", automation.Action)
 TurnOnAction = tm1651_ns.class_("TurnOnAction", automation.Action)
 TurnOffAction = tm1651_ns.class_("TurnOffAction", automation.Action)
-
-CONF_LEVEL_PERCENT = "level_percent"
 
 TM1651_BRIGHTNESS_OPTIONS = {
     1: TM1651Brightness.TM1651_DARKEST,
@@ -40,19 +42,18 @@ CONFIG_SCHEMA = cv.All(
     ),
 )
 
-validate_level_percent = cv.All(cv.int_range(min=0, max=100))
-validate_level = cv.All(cv.int_range(min=0, max=7))
-validate_brightness = cv.enum(TM1651_BRIGHTNESS_OPTIONS, int=True)
-
-
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-
     clk_pin = await cg.gpio_pin_expression(config[CONF_CLK_PIN])
     cg.add(var.set_clk_pin(clk_pin))
     dio_pin = await cg.gpio_pin_expression(config[CONF_DIO_PIN])
     cg.add(var.set_dio_pin(dio_pin))
+
+
+validate_brightness = cv.enum(TM1651_BRIGHTNESS_OPTIONS, int=True)
+validate_level = cv.All(cv.int_range(min=0, max=7))
+validate_level_percent = cv.All(cv.int_range(min=0, max=100))
 
 BINARY_OUTPUT_ACTION_SCHEMA = maybe_simple_id(
     {
@@ -60,45 +61,23 @@ BINARY_OUTPUT_ACTION_SCHEMA = maybe_simple_id(
     }
 )
 
-
-@automation.register_action("tm1651.turn_on", TurnOnAction, BINARY_OUTPUT_ACTION_SCHEMA)
-async def output_turn_on_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-    return var
-
-
-@automation.register_action(
-    "tm1651.turn_off", TurnOffAction, BINARY_OUTPUT_ACTION_SCHEMA
-)
-async def output_turn_off_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-    return var
-
-
-@automation.register_action(
-    "tm1651.set_level_percent",
-    SetLevelPercentAction,
+@automation.register_action("tm1651.set_brightness", SetBrightnessAction,
     cv.maybe_simple_value(
         {
             cv.GenerateID(): cv.use_id(TM1651Display),
-            cv.Required(CONF_LEVEL_PERCENT): cv.templatable(validate_level_percent),
+            cv.Required(CONF_BRIGHTNESS): cv.templatable(validate_brightness),
         },
-        key=CONF_LEVEL_PERCENT,
+        key=CONF_BRIGHTNESS,
     ),
 )
-async def tm1651_set_level_percent_to_code(config, action_id, template_arg, args):
+async def tm1651_set_brightness_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
-    template_ = await cg.templatable(config[CONF_LEVEL_PERCENT], args, cg.uint8)
-    cg.add(var.set_level_percent(template_))
+    template_ = await cg.templatable(config[CONF_BRIGHTNESS], args, cg.uint8)
+    cg.add(var.set_brightness(template_))
     return var
 
-
-@automation.register_action(
-    "tm1651.set_level",
-    SetLevelAction,
+@automation.register_action("tm1651.set_level", SetLevelAction,
     cv.maybe_simple_value(
         {
             cv.GenerateID(): cv.use_id(TM1651Display),
@@ -114,21 +93,42 @@ async def tm1651_set_level_to_code(config, action_id, template_arg, args):
     cg.add(var.set_level(template_))
     return var
 
-
-@automation.register_action(
-    "tm1651.set_brightness",
-    SetBrightnessAction,
+@automation.register_action("tm1651.set_level_percent", SetLevelPercentAction,
     cv.maybe_simple_value(
         {
             cv.GenerateID(): cv.use_id(TM1651Display),
-            cv.Required(CONF_BRIGHTNESS): cv.templatable(validate_brightness),
+            cv.Required(CONF_LEVEL_PERCENT): cv.templatable(validate_level_percent),
         },
-        key=CONF_BRIGHTNESS,
+        key=CONF_LEVEL_PERCENT,
     ),
 )
-async def tm1651_set_brightness_to_code(config, action_id, template_arg, args):
+async def tm1651_set_level_percent_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
-    template_ = await cg.templatable(config[CONF_BRIGHTNESS], args, cg.uint8)
-    cg.add(var.set_brightness(template_))
+    template_ = await cg.templatable(config[CONF_LEVEL_PERCENT], args, cg.uint8)
+    cg.add(var.set_level_percent(template_))
+    return var
+
+@automation.register_action("tm1651.frame_off", FrameOffAction, BINARY_OUTPUT_ACTION_SCHEMA)
+async def output_frame_off_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
+    return var
+
+@automation.register_action("tm1651.frame_on", FrameOnAction, BINARY_OUTPUT_ACTION_SCHEMA)
+async def output_frame_on_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
+    return var
+
+@automation.register_action("tm1651.turn_off", TurnOffAction, BINARY_OUTPUT_ACTION_SCHEMA)
+async def output_turn_off_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
+    return var
+
+@automation.register_action("tm1651.turn_on", TurnOnAction, BINARY_OUTPUT_ACTION_SCHEMA)
+async def output_turn_on_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
     return var

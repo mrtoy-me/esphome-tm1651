@@ -30,14 +30,17 @@ class TM1651Display : public Component {
   void turn_off();
   void turn_on();
 
+  void frame_off();
+  void frame_on();
+
  protected:
   uint8_t calculate_brightness(uint8_t new_brightness);
   uint8_t calculate_level(uint8_t percentage);
 
-  void write_level();
-  void frame(bool state);
+  void display_level();
 
-  void write_brightness(uint8_t control);
+  void update_brightness(uint8_t on_off_control);
+  void update_frame(bool state);
 
   // low level functions
   void delineate_transmission(bool dio_state);
@@ -59,13 +62,13 @@ class TM1651Display : public Component {
   uint8_t level_{0};
 };
 
-template<typename... Ts> class SetLevelPercentAction : public Action<Ts...>, public Parented<TM1651Display> {
+template<typename... Ts> class SetBrightnessAction : public Action<Ts...>, public Parented<TM1651Display> {
  public:
-  TEMPLATABLE_VALUE(uint8_t, level_percent)
+  TEMPLATABLE_VALUE(uint8_t, brightness)
 
   void play(Ts... x) override {
-    auto level_percent = this->level_percent_.value(x...);
-    this->parent_->set_level_percent(level_percent);
+    auto brightness = this->brightness_.value(x...);
+    this->parent_->set_brightness(brightness);
   }
 };
 
@@ -79,14 +82,24 @@ template<typename... Ts> class SetLevelAction : public Action<Ts...>, public Par
   }
 };
 
-template<typename... Ts> class SetBrightnessAction : public Action<Ts...>, public Parented<TM1651Display> {
+template<typename... Ts> class SetLevelPercentAction : public Action<Ts...>, public Parented<TM1651Display> {
  public:
-  TEMPLATABLE_VALUE(uint8_t, brightness)
+  TEMPLATABLE_VALUE(uint8_t, level_percent)
 
   void play(Ts... x) override {
-    auto brightness = this->brightness_.value(x...);
-    this->parent_->set_brightness(brightness);
+    auto level_percent = this->level_percent_.value(x...);
+    this->parent_->set_level_percent(level_percent);
   }
+};
+
+template<typename... Ts> class FrameOnAction : public Action<Ts...>, public Parented<TM1651Display> {
+ public:
+  void play(Ts... x) override { this->parent_->frame_on(); }
+};
+
+template<typename... Ts> class FrameOffAction : public Action<Ts...>, public Parented<TM1651Display> {
+ public:
+  void play(Ts... x) override { this->parent_->frame_off(); }
 };
 
 template<typename... Ts> class TurnOnAction : public Action<Ts...>, public Parented<TM1651Display> {
