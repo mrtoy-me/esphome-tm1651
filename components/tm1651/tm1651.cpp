@@ -56,7 +56,7 @@ void TM1651Display::setup() {
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
   // initialise brightness to TYPICAL
-  this->brightness_ = HARDWARE_BRIGHTNESS_TYPICAL;
+  this->brightness_ = TM1651_BRIGHTNESS_TYPICAL;
 
   // initialised already
   // level_ = 0
@@ -64,7 +64,7 @@ void TM1651Display::setup() {
 
   // clear display
   this->display_level();
-  this->frame(false);
+  this->update_frame(false);
   this->update_brightness(DISPLAY_ON);
 
 }
@@ -103,22 +103,22 @@ void TM1651Display::turn_on() {
 }
 
 void TM1651Display::frame_off() {
-  this->display_frame(false);
+  this->update_frame(false);
 }
 
 void TM1651Display::frame_on() {
-  this->display_frame(true);
+  this->update_frame(true);
 }
 
 
 // protected
 
 uint8_t TM1651Display::calculate_brightness(uint8_t new_brightness) {
-  if (new_brightness <= 1) return HARDWARE_BRIGHTNESS_DARKEST;
-  if (new_brightness == 2) return HARDWARE_BRIGHTNESS_TYPICAL;
+  if (new_brightness <= 1) return TM1651_BRIGHTNESS_DARKEST;
+  if (new_brightness == 2) return TM1651_BRIGHTNESS_TYPICAL;
 
   // new_brightness >= 3
-  return HARDWARE_BRIGHTNESS_BRIGHTEST;
+  return TM1651_BRIGHTNESS_BRIGHTEST;
 }
 
 uint8_t TM1651Display::calculate_level(uint8_t percentage) {
