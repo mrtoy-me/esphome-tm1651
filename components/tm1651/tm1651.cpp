@@ -7,8 +7,8 @@ namespace tm1651 {
 
 static const char *const TAG = "tm1651.display";
 
-static const bool LINE_HIGH  = true;
-static const bool LINE_LOW   = false;
+static const bool LINE_HIGH                     = true;
+static const bool LINE_LOW                      = false;
 
 // TM1651 maximum frequency is ~450 kHz
 // choose clock cycle in microseconds
@@ -28,7 +28,6 @@ static const uint8_t DISPLAY_ON                  = 0x88;
 static const uint8_t MAX_PERCENT                 = 100;
 static const uint8_t HALF_MAX_PERCENT            = MAX_PERCENT / 2;
 
-
 static const uint8_t TM1651_MAX_LEVEL            = 7;
 
 static const uint8_t TM1651_BRIGHTNESS_DARKEST   = 0;
@@ -44,7 +43,6 @@ static const uint8_t TM1651_LEVEL_TAB[]          = { 0b00000000,
                                                      0b00111111,
                                                      0b01111111 };
 
-
 // public
 
 void TM1651Display::setup() {
@@ -59,8 +57,8 @@ void TM1651Display::setup() {
   this->brightness_ = TM1651_BRIGHTNESS_TYPICAL;
 
   // initialised already
-  // level_ = 0
   // display_on_ = true
+  // level_ = 0
 
   // clear display
   this->update_frame(false);
