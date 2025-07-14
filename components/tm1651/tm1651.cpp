@@ -69,13 +69,13 @@ void TM1651Display::setup() {
 }
 
 void TM1651Display::dump_config() {
-  ESP_LOGCONFIG(TAG, "TM1651 Battery Display");
+  ESP_LOGCONFIG(TAG, "TM1651 Mini Battery Display");
   LOG_PIN("  CLK: ", clk_pin_);
   LOG_PIN("  DIO: ", dio_pin_);
 }
 
 void TM1651Display::set_brightness(uint8_t new_brightness) {
-  this->brightness_ = this->calculate_brightness(new_brightness);
+  this->brightness_ = this->remap_brightness(new_brightness);
   if (this->display_on_) this->update_brightness(DISPLAY_ON);
 }
 
@@ -112,7 +112,7 @@ void TM1651Display::frame_on() {
 
 // protected
 
-uint8_t TM1651Display::calculate_brightness(uint8_t new_brightness) {
+uint8_t TM1651Display::remap_brightness(uint8_t new_brightness) {
   if (new_brightness <= 1) return TM1651_BRIGHTNESS_DARKEST;
   if (new_brightness == 2) return TM1651_BRIGHTNESS_TYPICAL;
 
@@ -131,12 +131,12 @@ uint8_t TM1651Display::calculate_level(uint8_t percentage) {
 
 void TM1651Display::display_level() {
   this->start();
-  if (!this->write_byte(ADDR_FIXED)) ESP_LOGD(TAG, "  Ack not received");
+  if (!this->write_byte(ADDR_FIXED));
   this->stop();
 
   this->start();
-  if (!this->write_byte(ADDR_START)) ESP_LOGD(TAG, "  Ack not received");
-  if (!this->write_byte(TM1651_LEVEL_TAB[this->level_])) ESP_LOGD(TAG, "  Ack not received");
+  if (!this->write_byte(ADDR_START));
+  if (!this->write_byte(TM1651_LEVEL_TAB[this->level_]));
   this->stop();
 }
 

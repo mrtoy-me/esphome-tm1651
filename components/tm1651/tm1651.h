@@ -34,7 +34,7 @@ class TM1651Display : public Component {
   void frame_on();
 
  protected:
-  uint8_t calculate_brightness(uint8_t new_brightness);
+  uint8_t remap_brightness(uint8_t new_brightness);
   uint8_t calculate_level(uint8_t percentage);
 
   void display_level();
