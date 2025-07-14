@@ -77,18 +77,21 @@ void TM1651Display::dump_config() {
 
 void TM1651Display::set_brightness(uint8_t new_brightness) {
   this->brightness_ = this->calculate_brightness(new_brightness);
-  if (this->display_on_) this->update_brightness(DISPLAY_ON);
+  if (!this->display_on_) return;
+  this->update_brightness(DISPLAY_ON);
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
   if (new_level > TM1651_MAX_LEVEL) new_level = TM1651_MAX_LEVEL;
   this->level_ = new_level;
-  if (this->display_on_) this->display_level();
+  if (!this->display_on_) return;
+  this->display_level();
 }
 
 void TM1651Display::set_level_percent(uint8_t percentage) {
   this->level_ = this->calculate_level(percentage);
-  if (this->display_on_) this->display_level();
+  if (!this->display_on_) return;
+  this->display_level();
 }
 
 void TM1651Display::turn_off() {
