@@ -17,7 +17,7 @@ class TM1651Display : public Component {
  public:
   void set_clk_pin(InternalGPIOPin* pin) { clk_pin_ = pin; }
   void set_dio_pin(InternalGPIOPin* pin) { dio_pin_ = pin; }
-  void set_max_levels(uint8 max_levels) {max_display_levels_ = max_levels; }
+  void set_max_levels(uint8_t max_levels) {max_display_levels_ = max_levels; }
 
   void setup() override;
   void dump_config() override;
