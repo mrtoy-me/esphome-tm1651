@@ -53,11 +53,10 @@ async def to_code(config):
     cg.add(var.set_dio_pin(dio_pin))
     cg.add(var.set_max_levels(config[CONF_MAX_LEVELS]))
 
-
-max = config.get(CONF_MAX_LEVELS)
+upper = config.get(CONF_MAX_LEVELS)
 
 validate_brightness = cv.enum(TM1651_BRIGHTNESS_OPTIONS, int=True)
-validate_level = cv.All(cv.int_range(min=0, max))
+validate_level = cv.All(cv.int_range(min=0, max=upper))
 validate_level_percent = cv.All(cv.int_range(min=0, max=100))
 
 BINARY_OUTPUT_ACTION_SCHEMA = maybe_simple_id(
