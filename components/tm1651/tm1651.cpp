@@ -25,10 +25,8 @@ static const uint8_t FRAME_START                 = 0xC1;
 static const uint8_t DISPLAY_OFF                 = 0x80;
 static const uint8_t DISPLAY_ON                  = 0x88;
 
-static const uint8_t MAX_PERCENT                 = 100;
-static const uint8_t HALF_MAX_PERCENT            = MAX_PERCENT / 2;
-
-static const uint8_t TM1651_MAX_LEVEL            = 7;
+static const uint8_t PERCENT100                  = 100;
+static const uint8_t PERCENT50                   = 50;
 
 static const uint8_t TM1651_BRIGHTNESS_DARKEST   = 0;
 static const uint8_t TM1651_BRIGHTNESS_TYPICAL   = 2;
@@ -78,7 +76,7 @@ void TM1651Display::set_brightness(uint8_t new_brightness) {
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
-  if (new_level > TM1651_MAX_LEVEL) new_level = TM1651_MAX_LEVEL;
+  if (new_level > this->max_display_levels_) new_level = this->max_display_levels_;
   this->level_ = new_level;
   if (this->display_on_) this->display_level();
 }
@@ -119,12 +117,12 @@ uint8_t TM1651Display::remap_brightness(uint8_t new_brightness) {
 }
 
 uint8_t TM1651Display::calculate_level(uint8_t percentage) {
-  if (percentage > MAX_PERCENT) percentage = MAX_PERCENT;
+  if (percentage > PERCENT100) percentage = PERCENT100;
   // scale 0-100% to 0-7 display levels
   // use integer arithmetic
   // round by adding half maximum percent before division by maximum percent
-  uint16_t initial_scaling = (percentage * TM1651_MAX_LEVEL) + HALF_MAX_PERCENT;
-  return (uint8_t)(initial_scaling / MAX_PERCENT);
+  uint16_t initial_scaling = (percentage * this->max_display_levels_) + PERCENT50;
+  return (uint8_t)(initial_scaling / PERCENT100);
 }
 
 void TM1651Display::display_level() {

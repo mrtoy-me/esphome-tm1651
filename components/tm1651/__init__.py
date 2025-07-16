@@ -13,6 +13,7 @@ from esphome.const import (
 CODEOWNERS = ["@mrtoy-me"]
 
 CONF_LEVEL_PERCENT = "level_percent"
+CONF_MAX_LEVELS    = "max_levels"
 
 tm1651_ns = cg.esphome_ns.namespace("tm1651")
 TM1651Brightness = tm1651_ns.enum("TM1651Brightness")
@@ -38,6 +39,7 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(TM1651Display),
             cv.Required(CONF_CLK_PIN): pins.internal_gpio_output_pin_schema,
             cv.Required(CONF_DIO_PIN): pins.internal_gpio_output_pin_schema,
+            cv.Optional(CONF_MAX_LEVELS, default=7): cv.one_of(5, 7, 8, int=True),
         }
     ),
 )
@@ -49,6 +51,8 @@ async def to_code(config):
     cg.add(var.set_clk_pin(clk_pin))
     dio_pin = await cg.gpio_pin_expression(config[CONF_DIO_PIN])
     cg.add(var.set_dio_pin(dio_pin))
+    cg.add(var.set_max_levels(config[CONF_MAX_LEVELS]))
+
 
 
 validate_brightness = cv.enum(TM1651_BRIGHTNESS_OPTIONS, int=True)
