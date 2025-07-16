@@ -53,14 +53,10 @@ async def to_code(config):
     cg.add(var.set_dio_pin(dio_pin))
     cg.add(var.set_max_levels(config[CONF_MAX_LEVELS]))
 
+
 validate_brightness = cv.enum(TM1651_BRIGHTNESS_OPTIONS, int=True)
 validate_level = cv.All(cv.int_range(min=0, max=7))
 validate_level_percent = cv.All(cv.int_range(min=0, max=100))
-
-def validate_config(config):
-   if config[CONF_LEVEL] > config[CONF_MAX_LEVELS]:
-     raise cv.Invalid("Level must <= Maximum Number Levels")
-   return config
 
 BINARY_OUTPUT_ACTION_SCHEMA = maybe_simple_id(
     {
@@ -90,7 +86,7 @@ async def tm1651_set_brightness_to_code(config, action_id, template_arg, args):
     cv.maybe_simple_value(
         {
             cv.GenerateID(): cv.use_id(TM1651Display),
-            cv.Required(CONF_LEVEL): cv.templatable(validate_config),
+            cv.Required(CONF_LEVEL): cv.templatable(validate_level),
         },
         key=CONF_LEVEL,
     ),
