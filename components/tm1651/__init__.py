@@ -33,6 +33,8 @@ TM1651_BRIGHTNESS_OPTIONS = {
     3: TM1651Brightness.TM1651_BRIGHTEST,
 }
 
+MULTI_CONF = True
+
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
