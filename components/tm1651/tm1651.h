@@ -60,6 +60,7 @@ class TM1651Display : public Component {
   uint8_t max_display_levels_;
 
   bool display_on_{true};
+  bool frame_valid_;
 
   uint8_t brightness_{};
   uint8_t level_{0};
