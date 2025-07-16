@@ -39,7 +39,7 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(TM1651Display),
             cv.Required(CONF_CLK_PIN): pins.internal_gpio_output_pin_schema,
             cv.Required(CONF_DIO_PIN): pins.internal_gpio_output_pin_schema,
-            cv.Optional(CONF_MAX_LEVELS, default=7): cv.one_of(5, 7, int=True),
+            cv.Optional(CONF_MAX_LEVELS, default=7): cv.one_of(5, 7, 8, int=True),
         }
     ),
 )
@@ -57,11 +57,6 @@ validate_brightness = cv.enum(TM1651_BRIGHTNESS_OPTIONS, int=True)
 validate_level = cv.All(cv.int_range(min=0, max=7))
 validate_level_percent = cv.All(cv.int_range(min=0, max=100))
 
-def validate_config(config):
-   if config[CONF_LEVEL] > config[CONF_MAX_LEVELS]:
-     raise cv.Invalid("Level must <= Maximum Number Levels")
-   return config
-
 BINARY_OUTPUT_ACTION_SCHEMA = maybe_simple_id(
     {
         cv.Required(CONF_ID): cv.use_id(TM1651Display),
@@ -77,7 +72,6 @@ BINARY_OUTPUT_ACTION_SCHEMA = maybe_simple_id(
         key=CONF_BRIGHTNESS,
     ),
 )
-
 async def tm1651_set_brightness_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
@@ -85,17 +79,15 @@ async def tm1651_set_brightness_to_code(config, action_id, template_arg, args):
     cg.add(var.set_brightness(template_))
     return var
 
-
 @automation.register_action("tm1651.set_level", SetLevelAction,
     cv.maybe_simple_value(
         {
             cv.GenerateID(): cv.use_id(TM1651Display),
-            cv.Required(CONF_LEVEL): cv.templatable(validate_config),
+            cv.Required(CONF_LEVEL): cv.templatable(validate_level),
         },
         key=CONF_LEVEL,
     ),
 )
-
 async def tm1651_set_level_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])

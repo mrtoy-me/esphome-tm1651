@@ -25,8 +25,6 @@ static const uint8_t FRAME_START                 = 0xC1;
 static const uint8_t DISPLAY_OFF                 = 0x80;
 static const uint8_t DISPLAY_ON                  = 0x88;
 
-static const uint8_t MAX_LEVEL_FRAME_IS_VALID    = 5;
-
 static const uint8_t PERCENT100                  = 100;
 static const uint8_t PERCENT50                   = 50;
 
@@ -55,8 +53,6 @@ void TM1651Display::setup() {
 
   // initialise brightness to TYPICAL
   this->brightness_ = TM1651_BRIGHTNESS_TYPICAL;
-
-  this->frame_valid_ = (this->max_display_levels_ == MAX_LEVEL_FRAME_IS_VALID);
 
   // initialised already
   // display_on_ = true
@@ -102,12 +98,10 @@ void TM1651Display::turn_on() {
 }
 
 void TM1651Display::frame_off() {
-  if (!this->frame_valid_) return;
   this->update_frame(false);
 }
 
 void TM1651Display::frame_on() {
-  if (!this->frame_valid_) return;
   this->update_frame(true);
 }
 
@@ -140,8 +134,6 @@ void TM1651Display::display_level() {
   if (!this->write_byte(ADDR_START));
   if (!this->write_byte(TM1651_LEVEL_TAB[this->level_]));
   this->stop();
-
-  this->update_brightness(DISPLAY_ON);
 }
 
 void TM1651Display::update_brightness(uint8_t on_off_control) {
@@ -163,8 +155,6 @@ void TM1651Display::update_frame(bool state) {
     this->write_byte(on_off_control);
   }
   this->stop();
-
-  this->update_brightness(DISPLAY_ON);
 }
 
 
