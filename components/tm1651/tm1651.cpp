@@ -125,7 +125,7 @@ void TM1651Display::display_level() {
   if (!this->write_byte(TM1651_LEVEL_TAB[this->level_]));
   this->stop();
 
-  this->update_brightness(DISPLAY_ON);
+  //this->update_brightness(DISPLAY_ON);
 }
 
 void TM1651Display::update_brightness(uint8_t on_off_control) {
