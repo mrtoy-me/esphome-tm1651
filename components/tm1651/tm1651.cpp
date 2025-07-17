@@ -17,15 +17,13 @@ static const uint8_t CLOCK_CYCLE                = 8;
 static const uint8_t HALF_CLOCK_CYCLE            = CLOCK_CYCLE / 2;
 static const uint8_t QUARTER_CLOCK_CYCLE         = CLOCK_CYCLE / 4;
 
-static const uint8_t ADDR_AUTO                   = 0x40;
 static const uint8_t ADDR_FIXED                  = 0x44; // fixed address mode
 static const uint8_t ADDR_START                  = 0xC0; // address of the display register
-static const uint8_t FRAME_START                 = 0xC1;
 
 static const uint8_t DISPLAY_OFF                 = 0x80;
 static const uint8_t DISPLAY_ON                  = 0x88;
 
-static const uint8_t MAX_LEVEL_FRAME_IS_VALID    = 5;
+static const uint8_t MAX_DISPLAY_LEVELS          = 7;
 
 static const uint8_t PERCENT100                  = 100;
 static const uint8_t PERCENT50                   = 50;
@@ -56,14 +54,11 @@ void TM1651Display::setup() {
   // initialise brightness to TYPICAL
   this->brightness_ = TM1651_BRIGHTNESS_TYPICAL;
 
-  this->frame_valid_ = (this->max_display_levels_ == MAX_LEVEL_FRAME_IS_VALID);
-
   // initialised already
   // display_on_ = true
   // level_ = 0
 
   // clear display
-  this->update_frame(false);
   this->display_level();
   this->update_brightness(DISPLAY_ON);
 }
@@ -80,7 +75,7 @@ void TM1651Display::set_brightness(uint8_t new_brightness) {
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
-  if (new_level > this->max_display_levels_) new_level = this->max_display_levels_;
+  if (new_level > MAX_DISPLAY_LEVELS) new_level = MAX_DISPLAY_LEVELS;
   this->level_ = new_level;
   if (this->display_on_) this->display_level();
 }
@@ -97,20 +92,9 @@ void TM1651Display::turn_off() {
 
 void TM1651Display::turn_on() {
   this->display_on_ = true;
-  this->display_level(); // level could have been changed with display turned off
+  this->display_level(); // level could have been changed when display turned off
   this->update_brightness(DISPLAY_ON);
 }
-
-void TM1651Display::frame_off() {
-  if (!this->frame_valid_) return;
-  this->update_frame(false);
-}
-
-void TM1651Display::frame_on() {
-  if (!this->frame_valid_) return;
-  this->update_frame(true);
-}
-
 
 // protected
 
@@ -127,7 +111,7 @@ uint8_t TM1651Display::calculate_level(uint8_t percentage) {
   // scale 0-100% to 0-7 display levels
   // use integer arithmetic
   // round by adding half maximum percent before division by maximum percent
-  uint16_t initial_scaling = (percentage * this->max_display_levels_) + PERCENT50;
+  uint16_t initial_scaling = (percentage * MAX_DISPLAY_LEVELS) + PERCENT50;
   return (uint8_t)(initial_scaling / PERCENT100);
 }
 
@@ -149,24 +133,6 @@ void TM1651Display::update_brightness(uint8_t on_off_control) {
   this->write_byte(on_off_control | this->brightness_);
   this->stop();
 }
-
-void TM1651Display::update_frame(bool state) {
-  uint8_t on_off_control = state ? 0x40 : 0x00;
-
-  this->start();
-  this->write_byte(ADDR_AUTO);
-  this->stop();
-
-  this->start();
-  this->write_byte(FRAME_START);
-  for (uint8_t i = 0; i < 3; i++) {
-    this->write_byte(on_off_control);
-  }
-  this->stop();
-
-  this->update_brightness(DISPLAY_ON);
-}
-
 
 // low level functions
 

@@ -13,7 +13,6 @@ from esphome.const import (
 CODEOWNERS = ["@mrtoy-me"]
 
 CONF_LEVEL_PERCENT = "level_percent"
-CONF_MAX_LEVELS    = "max_levels"
 
 tm1651_ns = cg.esphome_ns.namespace("tm1651")
 TM1651Brightness = tm1651_ns.enum("TM1651Brightness")
@@ -22,8 +21,6 @@ TM1651Display = tm1651_ns.class_("TM1651Display", cg.Component)
 SetBrightnessAction = tm1651_ns.class_("SetBrightnessAction", automation.Action)
 SetLevelAction = tm1651_ns.class_("SetLevelAction", automation.Action)
 SetLevelPercentAction = tm1651_ns.class_("SetLevelPercentAction", automation.Action)
-FrameOnAction = tm1651_ns.class_("FrameOnAction", automation.Action)
-FrameOffAction = tm1651_ns.class_("FrameOffAction", automation.Action)
 TurnOnAction = tm1651_ns.class_("TurnOnAction", automation.Action)
 TurnOffAction = tm1651_ns.class_("TurnOffAction", automation.Action)
 
@@ -41,7 +38,6 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(TM1651Display),
             cv.Required(CONF_CLK_PIN): pins.internal_gpio_output_pin_schema,
             cv.Required(CONF_DIO_PIN): pins.internal_gpio_output_pin_schema,
-            cv.Optional(CONF_MAX_LEVELS, default=7): cv.one_of(5, 7, int=True),
         }
     ),
 )
@@ -53,7 +49,6 @@ async def to_code(config):
     cg.add(var.set_clk_pin(clk_pin))
     dio_pin = await cg.gpio_pin_expression(config[CONF_DIO_PIN])
     cg.add(var.set_dio_pin(dio_pin))
-    cg.add(var.set_max_levels(config[CONF_MAX_LEVELS]))
 
 
 validate_brightness = cv.enum(TM1651_BRIGHTNESS_OPTIONS, int=True)
@@ -115,18 +110,6 @@ async def tm1651_set_level_percent_to_code(config, action_id, template_arg, args
     await cg.register_parented(var, config[CONF_ID])
     template_ = await cg.templatable(config[CONF_LEVEL_PERCENT], args, cg.uint8)
     cg.add(var.set_level_percent(template_))
-    return var
-
-@automation.register_action("tm1651.frame_off", FrameOffAction, BINARY_OUTPUT_ACTION_SCHEMA)
-async def output_frame_off_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-    return var
-
-@automation.register_action("tm1651.frame_on", FrameOnAction, BINARY_OUTPUT_ACTION_SCHEMA)
-async def output_frame_on_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
     return var
 
 @automation.register_action("tm1651.turn_off", TurnOffAction, BINARY_OUTPUT_ACTION_SCHEMA)

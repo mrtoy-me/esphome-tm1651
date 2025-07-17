@@ -17,7 +17,6 @@ class TM1651Display : public Component {
  public:
   void set_clk_pin(InternalGPIOPin* pin) { clk_pin_ = pin; }
   void set_dio_pin(InternalGPIOPin* pin) { dio_pin_ = pin; }
-  void set_max_levels(uint8_t max_levels) {max_display_levels_ = max_levels; }
 
   void setup() override;
   void dump_config() override;
@@ -31,9 +30,6 @@ class TM1651Display : public Component {
   void turn_off();
   void turn_on();
 
-  void frame_off();
-  void frame_on();
-
  protected:
   uint8_t remap_brightness(uint8_t new_brightness);
   uint8_t calculate_level(uint8_t percentage);
@@ -41,7 +37,6 @@ class TM1651Display : public Component {
   void display_level();
 
   void update_brightness(uint8_t on_off_control);
-  void update_frame(bool state);
 
   // low level functions
   void delineate_transmission(bool dio_state);
@@ -57,10 +52,7 @@ class TM1651Display : public Component {
   InternalGPIOPin* clk_pin_;
   InternalGPIOPin* dio_pin_;
 
-  uint8_t max_display_levels_;
-
   bool display_on_{true};
-  bool frame_valid_;
 
   uint8_t brightness_{};
   uint8_t level_{0};
@@ -94,16 +86,6 @@ template<typename... Ts> class SetLevelPercentAction : public Action<Ts...>, pub
     auto level_percent = this->level_percent_.value(x...);
     this->parent_->set_level_percent(level_percent);
   }
-};
-
-template<typename... Ts> class FrameOnAction : public Action<Ts...>, public Parented<TM1651Display> {
- public:
-  void play(Ts... x) override { this->parent_->frame_on(); }
-};
-
-template<typename... Ts> class FrameOffAction : public Action<Ts...>, public Parented<TM1651Display> {
- public:
-  void play(Ts... x) override { this->parent_->frame_off(); }
 };
 
 template<typename... Ts> class TurnOnAction : public Action<Ts...>, public Parented<TM1651Display> {
