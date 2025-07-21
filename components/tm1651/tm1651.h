@@ -31,23 +31,23 @@ class TM1651Display : public Component {
   void turn_on();
 
  protected:
-  uint8_t remap_brightness(uint8_t new_brightness);
-  uint8_t calculate_level(uint8_t percentage);
+  uint8_t remap_brightness_(uint8_t new_brightness);
+  uint8_t calculate_level_(uint8_t percentage);
 
-  void display_level();
+  void display_level_();
 
-  void update_brightness(uint8_t on_off_control);
+  void update_brightness_(uint8_t on_off_control);
 
   // low level functions
-  void delineate_transmission(bool dio_state);
-  void half_cycle_clock_high();
-  bool half_cycle_clock_high_ack();
-  void half_cycle_clock_low(bool data_bit);
+  void delineate_transmission_(bool dio_state);
+  void half_cycle_clock_high_();
+  bool half_cycle_clock_high_ack_();
+  void half_cycle_clock_low_(bool data_bit);
 
-  void start();
-  void stop();
+  void start_();
+  void stop_();
 
-  bool write_byte(uint8_t data);
+  bool write_byte_(uint8_t data);
 
   InternalGPIOPin* clk_pin_;
   InternalGPIOPin* dio_pin_;
