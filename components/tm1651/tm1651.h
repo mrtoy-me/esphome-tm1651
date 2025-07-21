@@ -31,11 +31,10 @@ class TM1651Display : public Component {
   void turn_on();
 
  protected:
-  uint8_t remap_brightness_(uint8_t new_brightness);
   uint8_t calculate_level_(uint8_t percentage);
-
   void display_level_();
 
+  uint8_t remap_brightness_(uint8_t new_brightness);
   void update_brightness_(uint8_t on_off_control);
 
   // low level functions
