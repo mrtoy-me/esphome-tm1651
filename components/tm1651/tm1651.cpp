@@ -12,7 +12,7 @@ static const bool LINE_LOW = false;
 
 // TM1651 maximum frequency is 500 kHz (duty ratio 50%) = 2 microseconds / cycle
 // choose appropriate clock cycle in microseconds
-static const uint8_t CLOCK_CYCLE = 12;
+static const uint8_t CLOCK_CYCLE = 48;
 
 static const uint8_t HALF_CLOCK_CYCLE = CLOCK_CYCLE / 2;
 static const uint8_t QUARTER_CLOCK_CYCLE = CLOCK_CYCLE / 4;
