@@ -65,7 +65,11 @@ void TM1651Display::dump_config() {
 
 void TM1651Display::set_brightness(uint8_t new_brightness) {
   this->brightness_ = this->remap_brightness_(new_brightness);
-  if (this->display_on_) this->update_brightness_(DISPLAY_ON);
+  if (this->display_on_) {
+    // add for testing
+    this->display_level_();
+    this->update_brightness_(DISPLAY_ON);
+  }
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
@@ -116,17 +120,12 @@ void TM1651Display::display_level_() {
   this->start_();
   ok = this->write_byte_(ADDR_FIXED);
   this->stop_();
-  if (!ok) {
-    ESP_LOGD("", "error: addr fixed");
-    return;
-  }
+  if (!ok) ESP_LOGD("", "error: addr fixed");
 
   this->start_();
   ok = this->write_byte_(ADDR_START);
   if (!ok) ESP_LOGD("", "error: addr start");
-  if (ok) {
-    ok = this->write_byte_(TM1651_LEVEL_TAB[this->level_]);
-  }
+  ok = this->write_byte_(TM1651_LEVEL_TAB[this->level_]);
   if (!ok) ESP_LOGD("", "error: level");
   this->stop_();
 }
@@ -172,10 +171,10 @@ bool TM1651Display::half_cycle_clock_high_ack_() {
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
   bool ack = this->dio_pin_->digital_read();
 
-  // should get ack as input DIO low, received ack = false
-  // now output DIO to low before data line
-  // releases at next clock cycle
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
+
+  // ack should be set DIO low by now
+  // its not so set DIO low before the next cycle
   if (!ack) this->dio_pin_->digital_write(LINE_LOW);
 
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
@@ -220,7 +219,7 @@ bool TM1651Display::write_byte_(uint8_t data) {
   // DIO set high, should get ack by DIO low
   this->half_cycle_clock_low_(LINE_HIGH);
   bool ok = (!this->half_cycle_clock_high_ack_());
-  if (!ok) ESP_LOGD(TAG, "Write error: ack not received");
+  if (!ok) ESP_LOGD(TAG, "ack not received");
   // return true if ack low
   return ok;
 }
