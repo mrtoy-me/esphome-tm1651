@@ -117,21 +117,25 @@ void TM1651Display::display_level_() {
   ok = this->write_byte_(ADDR_FIXED);
   this->stop_();
   if (!ok) {
+    ESP_LOGD("", "error: addr fixed");
     return;
   }
 
   this->start_();
   ok = this->write_byte_(ADDR_START);
+  if (!ok) ESP_LOGD("", "error: addr start");
   if (ok) {
-    this->write_byte_(TM1651_LEVEL_TAB[this->level_]);
+    ok = this->write_byte_(TM1651_LEVEL_TAB[this->level_]);
   }
+  if (!ok) ESP_LOGD("", "error: level");
   this->stop_();
 }
 
 
 void TM1651Display::update_brightness_(uint8_t on_off_control) {
   this->start_();
-  this->write_byte_(on_off_control | this->brightness_);
+  bool ok = this->write_byte_(on_off_control | this->brightness_);
+  if (!ok) ESP_LOGD("", "error: brightness");
   this->stop_();
 }
 
