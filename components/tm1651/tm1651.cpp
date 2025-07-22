@@ -164,7 +164,7 @@ void TM1651Display::half_cycle_clock_high_() {
 bool TM1651Display::half_cycle_clock_high_ack_() {
   // start second half cycle when clock is high and check for ack
   // returns ack if received = false, since ack is DIO low
-
+  this->total_ =  + 1;
   this->clk_pin_->digital_write(LINE_HIGH);
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
@@ -207,6 +207,7 @@ void TM1651Display::stop_() {
 }
 void TM1651Display::reset_errors() {
   this->error_count_= 0;
+  this->total_ = 0;
 }
 
 bool TM1651Display::write_byte_(uint8_t data) {
@@ -225,7 +226,7 @@ bool TM1651Display::write_byte_(uint8_t data) {
   // DIO set high, should get ack by DIO low
   this->half_cycle_clock_low_(LINE_HIGH);
   bool ok = (!this->half_cycle_clock_high_ack_());
-  if (!ok) ESP_LOGD(TAG, "ack not received %i", this->error_count_);
+  if (!ok) ESP_LOGD(TAG, "ack not received %i from total %i", this->error_count_, this->total_);
   // return true if ack low
   return ok;
 }
