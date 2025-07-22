@@ -267,6 +267,6 @@ bool TM1651Display::write_byte_(uint8_t data) {
 //     ESP_LOGD(TAG, "ack not received: %i",this->error_count_);
 //   }
 //   return ok;
-}
+//}
 }  // namespace tm1651
 }  // namespace esphome
