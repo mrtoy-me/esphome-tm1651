@@ -236,7 +236,7 @@ bool TM1651Display::write_byte_(uint8_t data) {
   bool ack = this->half_cycle_clock_high_ack_();
   if (!ack) ESP_LOGD(TAG, "ack not received %i from total %i", this->error_count_, this->total_);
   // return true if ack low
-  return ok;
+  return ack;
 }
 
 // bool TM1651Display::half_cycle_clock_high_ack_() {
