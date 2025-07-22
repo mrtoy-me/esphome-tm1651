@@ -164,7 +164,7 @@ void TM1651Display::half_cycle_clock_high_() {
 bool TM1651Display::half_cycle_clock_high_ack_() {
   // start second half cycle when clock is high and check for ack
   // returns ack if received = false, since ack is DIO low
-  this->total_ =  + 1;
+  this->total_ =  this->total_ + 1;
   this->clk_pin_->digital_write(LINE_HIGH);
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
