@@ -166,8 +166,8 @@ bool TM1651Display::half_cycle_clock_high_ack_() {
   // returns ack if received = false, since ack is DIO low
   this->total_ =  this->total_ + 1;
   this->clk_pin_->digital_write(LINE_HIGH);
-  delayMicroseconds(QUARTER_CLOCK_CYCLE);
-
+  //delayMicroseconds(QUARTER_CLOCK_CYCLE);
+  delayMicroseconds(HALF_CLOCK_CYCLE);
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
   bool ack = this->dio_pin_->digital_read();
 
