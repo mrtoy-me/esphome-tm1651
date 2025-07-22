@@ -203,26 +203,63 @@ void TM1651Display::stop_() {
   this->delineate_transmission_(LINE_LOW);
 }
 
+// bool TM1651Display::write_byte_(uint8_t data) {
+//   // returns true if ack sent after write
+
+//   // send 8 data bits
+//   // data bit can only be written to DIO when CLK is low
+//   for (uint8_t i = 0; i < 8; i++) {
+//     this->half_cycle_clock_low_((bool)(data & 0x01));
+//     this->half_cycle_clock_high_();
+//     // next bit
+//     data >>= 1;
+//   }
+
+//   // during the 9th cycle
+//   // DIO set high, should get ack by DIO low
+//   this->half_cycle_clock_low_(LINE_HIGH);
+//   bool ok = (!this->half_cycle_clock_high_ack_());
+//   if (!ok) ESP_LOGD(TAG, "ack not received");
+//   // return true if ack low
+//   return ok;
+// }
+
 bool TM1651Display::write_byte_(uint8_t data) {
-  // returns true if ack sent after write
+  uint8_t i, count1{0};
+  bool ok{true};
 
-  // send 8 data bits
-  // data bit can only be written to DIO when CLK is low
-  for (uint8_t i = 0; i < 8; i++) {
-    this->half_cycle_clock_low_((bool)(data & 0x01));
-    this->half_cycle_clock_high_();
-    // next bit
+  // sent 8bit data
+  for (i = 0; i < 8; i++) {
+    this->clk_pin_->digital_write(LINE_LOW);
+    if (data & 0x01) {
+      // LSB first
+      this->dio_pin_->digital_write(LINE_HIGH);
+    } else {
+      this->dio_pin_->digital_write(LINE_LOW);
+    }
+    delayMicroseconds(3);
     data >>= 1;
+    this->clk_pin_->digital_write(LINE_HIGH);
+    delayMicroseconds(3);
   }
-
-  // during the 9th cycle
-  // DIO set high, should get ack by DIO low
-  this->half_cycle_clock_low_(LINE_HIGH);
-  bool ok = (!this->half_cycle_clock_high_ack_());
+   // wait for the ACK
+  this->clk_pin_->digital_write(LINE_LOW);
+  this->dio_pin_->digital_write(LINE_HIGH);
+  this->clk_pin_->digital_write(LINE_HIGH);
+  this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
+  while (this->dio_pin_->digital_read();) {
+    count1 += 1;
+    if (count1 == 200) {
+      this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
+      this->dio_pin_->digital_write(LINE_LOW);
+      count1 = 0;
+      ok = false;
+    }
+    this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
+  }
+  this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
   if (!ok) ESP_LOGD(TAG, "ack not received");
-  // return true if ack low
   return ok;
 }
-
 }  // namespace tm1651
 }  // namespace esphome
