@@ -177,7 +177,7 @@ bool TM1651Display::half_cycle_clock_high_ack_() {
   // its not so set DIO low before the next cycle
   if (!ack) {
     this->dio_pin_->digital_write(LINE_LOW);
-    this->error_count_ = this->error_count_ + 1
+    this->error_count_ = this->error_count_ + 1;
   }
 
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
