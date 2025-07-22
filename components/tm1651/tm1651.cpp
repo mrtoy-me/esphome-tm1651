@@ -247,7 +247,7 @@ bool TM1651Display::half_cycle_clock_high_ack_() {
       this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
       this->dio_pin_->digital_write(LINE_LOW);
       count1 = 0;
-      this->error_count_ = this->error_count_ + 1
+      this->error_count_ = this->error_count_ + 1;
       ack = true;
     }
     this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
