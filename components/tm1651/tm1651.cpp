@@ -258,7 +258,10 @@ bool TM1651Display::write_byte_(uint8_t data) {
     this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
   }
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
-  if (!ok) ESP_LOGD(TAG, "ack not received");
+  if (!ok) {
+    this->error_count_ = this->error_count_ + 1;
+    ESP_LOGD(TAG, "ack not received: %i",this->error_count_);
+  }
   return ok;
 }
 }  // namespace tm1651

@@ -55,6 +55,7 @@ class TM1651Display : public Component {
 
   uint8_t brightness_{};
   uint8_t level_{0};
+  uint8_t error_count_{0};
 };
 
 template<typename... Ts> class SetBrightnessAction : public Action<Ts...>, public Parented<TM1651Display> {
