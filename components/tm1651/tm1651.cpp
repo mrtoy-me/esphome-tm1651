@@ -210,6 +210,10 @@ void TM1651Display::reset_errors() {
   this->total_ = 0;
 }
 
+void TM1651Display::show_errors() {
+  ESP_LOGD(TAG, "ack not received %i from total %i = %3.1f", this->error_count_, this->total_, ((float)(this->error_count_)*100.0)/(float)(this->error_total_));
+}
+
 bool TM1651Display::write_byte_(uint8_t data) {
   // returns true if ack sent after write
 

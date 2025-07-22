@@ -30,6 +30,7 @@ class TM1651Display : public Component {
   void turn_off();
   void turn_on();
   void reset_errors();
+  void show_errors();
 
  protected:
   uint8_t calculate_level_(uint8_t percentage);
