@@ -202,6 +202,9 @@ void TM1651Display::stop_() {
   // stop data transmission
   this->delineate_transmission_(LINE_LOW);
 }
+void TM1651Display::reset_errors() {
+  this->error_count_= 0;
+}
 
 // bool TM1651Display::write_byte_(uint8_t data) {
 //   // returns true if ack sent after write
