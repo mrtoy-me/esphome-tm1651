@@ -211,7 +211,7 @@ void TM1651Display::reset_errors() {
 }
 
 void TM1651Display::show_errors() {
-  ESP_LOGD(TAG, "ack not received %i from total %i = %3.1f", this->error_count_, this->total_, ((float)(this->error_count_)*100.0)/(float)(this->error_total_));
+  ESP_LOGD(TAG, "ack not received %i from total %i = %3.1f", this->error_count_, this->total_, ((float)(this->error_count_)*100.0)/(float)(this->total_));
 }
 
 bool TM1651Display::write_byte_(uint8_t data) {
