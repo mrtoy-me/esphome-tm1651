@@ -247,7 +247,7 @@ bool TM1651Display::write_byte_(uint8_t data) {
   this->dio_pin_->digital_write(LINE_HIGH);
   this->clk_pin_->digital_write(LINE_HIGH);
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-  while (this->dio_pin_->digital_read();) {
+  while (this->dio_pin_->digital_read()) {
     count1 += 1;
     if (count1 == 200) {
       this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
