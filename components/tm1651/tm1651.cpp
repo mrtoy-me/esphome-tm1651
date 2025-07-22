@@ -161,28 +161,28 @@ void TM1651Display::half_cycle_clock_high_() {
   delayMicroseconds(HALF_CLOCK_CYCLE);
 }
 
-bool TM1651Display::half_cycle_clock_high_ack_() {
-  // start second half cycle when clock is high and check for ack
-  // returns ack if received = false, since ack is DIO low
+// bool TM1651Display::half_cycle_clock_high_ack_() {
+//   // start second half cycle when clock is high and check for ack
+//   // returns ack if received = false, since ack is DIO low
 
-  this->clk_pin_->digital_write(LINE_HIGH);
-  delayMicroseconds(QUARTER_CLOCK_CYCLE);
+//   this->clk_pin_->digital_write(LINE_HIGH);
+//   delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
-  this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-  bool ack = this->dio_pin_->digital_read();
+//   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
+//   bool ack = this->dio_pin_->digital_read();
 
-  this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
+//   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
-  // ack should be set DIO low by now
-  // its not so set DIO low before the next cycle
-  if (!ack) this->dio_pin_->digital_write(LINE_LOW);
+//   // ack should be set DIO low by now
+//   // its not so set DIO low before the next cycle
+//   if (!ack) this->dio_pin_->digital_write(LINE_LOW);
 
-  delayMicroseconds(QUARTER_CLOCK_CYCLE);
-  // begin next cycle
-  this->clk_pin_->digital_write(LINE_LOW);
+//   delayMicroseconds(QUARTER_CLOCK_CYCLE);
+//   // begin next cycle
+//   this->clk_pin_->digital_write(LINE_LOW);
 
-  return ack;
-}
+//   return ack;
+// }
 
 void TM1651Display::half_cycle_clock_low_(bool data_bit) {
    // start first half cycle when CLK low and write data bit
@@ -227,46 +227,39 @@ bool TM1651Display::write_byte_(uint8_t data) {
   return ok;
 }
 
-// bool TM1651Display::write_byte_(uint8_t data) {
-//   uint8_t i, count1{0};
-//   bool ok{true};
+bool TM1651Display::half_cycle_clock_high_ack_() {
+  // start second half cycle when clock is high and check for ack
+  // returns ack if received = false, since ack is DIO low
+  uint8_t count1{0};
+  bool ack{false};
 
-//   // sent 8bit data
-//   for (i = 0; i < 8; i++) {
-//     this->clk_pin_->digital_write(LINE_LOW);
-//     if (data & 0x01) {
-//       // LSB first
-//       this->dio_pin_->digital_write(LINE_HIGH);
-//     } else {
-//       this->dio_pin_->digital_write(LINE_LOW);
-//     }
-//     delayMicroseconds(3);
-//     data >>= 1;
-//     this->clk_pin_->digital_write(LINE_HIGH);
-//     delayMicroseconds(3);
-//   }
-//    // wait for the ACK
-//   this->clk_pin_->digital_write(LINE_LOW);
-//   this->dio_pin_->digital_write(LINE_HIGH);
-//   this->clk_pin_->digital_write(LINE_HIGH);
-//   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-//   while (this->dio_pin_->digital_read()) {
-//     count1 += 1;
-//     if (count1 == 200) {
-//       this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
-//       this->dio_pin_->digital_write(LINE_LOW);
-//       count1 = 0;
-//       ok = false;
-//     }
-//     this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-//   }
+  this->clk_pin_->digital_write(LINE_HIGH);
+  delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
-//   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
-//   if (!ok) {
-//     this->error_count_ = this->error_count_ + 1;
-//     ESP_LOGD(TAG, "ack not received: %i",this->error_count_);
-//   }
-//   return ok;
-//}
+  this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
+
+  while (this->dio_pin_->digital_read()) {
+    count1 += 1;
+    if (count1 == 200) {
+      this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
+      this->dio_pin_->digital_write(LINE_LOW);
+      count1 = 0;
+      ack = true;
+    }
+    this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
+  }
+  this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
+
+  // ack should be set DIO low by now
+  // its not so set DIO low before the next cycle
+  //if (!ack) this->dio_pin_->digital_write(LINE_LOW);
+
+  delayMicroseconds(QUARTER_CLOCK_CYCLE);
+  // begin next cycle
+  this->clk_pin_->digital_write(LINE_LOW);
+
+  return ack;
+}
+
 }  // namespace tm1651
 }  // namespace esphome
