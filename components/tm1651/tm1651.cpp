@@ -7,39 +7,33 @@ namespace tm1651 {
 
 static const char *const TAG = "tm1651.display";
 
-static const bool LINE_HIGH                      = true;
-static const bool LINE_LOW                       = false;
+static const bool LINE_HIGH = true;
+static const bool LINE_LOW = false;
 
 // TM1651 maximum frequency is 500 kHz (duty ratio 50%) = 2 microseconds / cycle
 // choose appropriate clock cycle in microseconds
-static const uint8_t CLOCK_CYCLE                 = 8;
+static const uint8_t CLOCK_CYCLE = 8;
 
-static const uint8_t HALF_CLOCK_CYCLE            = CLOCK_CYCLE / 2;
-static const uint8_t QUARTER_CLOCK_CYCLE         = CLOCK_CYCLE / 4;
+static const uint8_t HALF_CLOCK_CYCLE = CLOCK_CYCLE / 2;
+static const uint8_t QUARTER_CLOCK_CYCLE = CLOCK_CYCLE / 4;
 
-static const uint8_t ADDR_FIXED                  = 0x44; // fixed address mode
-static const uint8_t ADDR_START                  = 0xC0; // address of the display register
+static const uint8_t ADDR_FIXED = 0x44; // fixed address mode
+static const uint8_t ADDR_START = 0xC0; // address of the display register
 
-static const uint8_t DISPLAY_OFF                 = 0x80;
-static const uint8_t DISPLAY_ON                  = 0x88;
+static const uint8_t DISPLAY_OFF = 0x80;
+static const uint8_t DISPLAY_ON = 0x88;
 
-static const uint8_t MAX_DISPLAY_LEVELS          = 7;
+static const uint8_t MAX_DISPLAY_LEVELS = 7;
 
-static const uint8_t PERCENT100                  = 100;
-static const uint8_t PERCENT50                   = 50;
+static const uint8_t PERCENT100 = 100;
+static const uint8_t PERCENT50 = 50;
 
-static const uint8_t TM1651_BRIGHTNESS_DARKEST   = 0;
-static const uint8_t TM1651_BRIGHTNESS_TYPICAL   = 2;
+static const uint8_t TM1651_BRIGHTNESS_DARKEST = 0;
+static const uint8_t TM1651_BRIGHTNESS_TYPICAL = 2;
 static const uint8_t TM1651_BRIGHTNESS_BRIGHTEST = 7;
 
-static const uint8_t TM1651_LEVEL_TAB[]          = { 0b00000000,
-                                                     0b00000001,
-                                                     0b00000011,
-                                                     0b00000111,
-                                                     0b00001111,
-                                                     0b00011111,
-                                                     0b00111111,
-                                                     0b01111111 };
+static const uint8_t TM1651_LEVEL_TAB[]          = { 0b00000000, 0b00000001, 0b00000011, 0b00000111,
+                                                     0b00001111, 0b00011111, 0b00111111, 0b01111111 };
 
 // public
 
@@ -117,15 +111,23 @@ uint8_t TM1651Display::calculate_level_(uint8_t percentage) {
 }
 
 void TM1651Display::display_level_() {
-  this->start_();
-  if (!this->write_byte_(ADDR_FIXED));
-  this->stop_();
+  bool ok;
 
   this->start_();
-  if (!this->write_byte_(ADDR_START));
-  if (!this->write_byte_(TM1651_LEVEL_TAB[this->level_]));
+  ok = this->write_byte_(ADDR_FIXED);
+  this->stop_();
+  if (!ok) {
+    return;
+  }
+
+  this->start_();
+  ok = this->write_byte_(ADDR_START);
+  if (ok) {
+    this->write_byte_(TM1651_LEVEL_TAB[this->level_]);
+  }
   this->stop_();
 }
+
 
 void TM1651Display::update_brightness_(uint8_t on_off_control) {
   this->start_();
@@ -136,9 +138,10 @@ void TM1651Display::update_brightness_(uint8_t on_off_control) {
 // low level functions
 
 void TM1651Display::delineate_transmission_(bool dio_state) {
-  // delineate a data transmission
-  // used by start and stop transmission
+  // delineate data transmission
   // DIO changes its value while CLK is high
+  // used by start and stop
+
   this->dio_pin_->digital_write(dio_state);
   delayMicroseconds(HALF_CLOCK_CYCLE);
 
@@ -150,14 +153,14 @@ void TM1651Display::delineate_transmission_(bool dio_state) {
 }
 
 void TM1651Display::half_cycle_clock_high_() {
-  // start the second half cycle
+  // start second half cycle
   this->clk_pin_->digital_write(LINE_HIGH);
   delayMicroseconds(HALF_CLOCK_CYCLE);
 }
 
 bool TM1651Display::half_cycle_clock_high_ack_() {
-  // start the second half cycle when the clock is high and check for the ack
-  // returns the ack bit and should be false)
+  // start second half cycle when clock is high and check for ack
+  // returns ack if received = false, since ack is DIO low
 
   this->clk_pin_->digital_write(LINE_HIGH);
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
@@ -165,21 +168,21 @@ bool TM1651Display::half_cycle_clock_high_ack_() {
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
   bool ack = this->dio_pin_->digital_read();
 
-  // DIO should be low, ack = false
-  // now set DIO to low before data line
-  // releases at the next clock cycle
+  // should get ack as input DIO low, received ack = false
+  // now output DIO to low before data line
+  // releases at next clock cycle
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
   if (!ack) this->dio_pin_->digital_write(LINE_LOW);
 
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
-  // begin the next cycle
+  // begin next cycle
   this->clk_pin_->digital_write(LINE_LOW);
 
   return ack;
 }
 
 void TM1651Display::half_cycle_clock_low_(bool data_bit) {
-   // start the first half cycle when the clock is low and write a data bit
+   // start first half cycle when CLK low and write data bit
   this->clk_pin_->digital_write(LINE_LOW);
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
@@ -189,20 +192,18 @@ void TM1651Display::half_cycle_clock_low_(bool data_bit) {
 
 void TM1651Display::start_() {
   // start data transmission
-  // DIO changes from high to low while CLK is high
   this->delineate_transmission_(LINE_HIGH);
 }
 
 void TM1651Display::stop_() {
   // stop data transmission
-  // DIO changes from low to high while CLK is high
   this->delineate_transmission_(LINE_LOW);
 }
 
 bool TM1651Display::write_byte_(uint8_t data) {
   // returns true if ack sent after write
 
-  // send 8 data bits, LSB first
+  // send 8 data bits
   // data bit can only be written to DIO when CLK is low
   for (uint8_t i = 0; i < 8; i++) {
     this->half_cycle_clock_low_((bool)(data & 0x01));
@@ -211,11 +212,13 @@ bool TM1651Display::write_byte_(uint8_t data) {
     data >>= 1;
   }
 
-  // during the 9th half-cycle of CLK when low,
-  // DIO set high, giving an ack by pulling DIO low
+  // during the 9th cycle
+  // DIO set high, should get ack by DIO low
   this->half_cycle_clock_low_(LINE_HIGH);
+  bool ok = (!this->half_cycle_clock_high_ack_());
+  if (!ok) ESP_LOGD(TAG, "Write error: ack not received");
   // return true if ack low
-  return !this->half_cycle_clock_high_ack_();
+  return ok;
 }
 
 }  // namespace tm1651

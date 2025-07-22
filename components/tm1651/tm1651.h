@@ -8,8 +8,8 @@ namespace esphome {
 namespace tm1651 {
 
 enum TM1651Brightness : uint8_t {
-  TM1651_DARKEST   = 1,
-  TM1651_TYPICAL   = 2,
+  TM1651_DARKEST = 1,
+  TM1651_TYPICAL = 2,
   TM1651_BRIGHTEST = 3,
 };
 
