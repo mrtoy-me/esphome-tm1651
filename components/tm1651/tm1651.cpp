@@ -245,7 +245,7 @@ bool TM1651Display::half_cycle_clock_high_ack_() {
 
   while (this->dio_pin_->digital_read()) {
     count1 += 1;
-    if (count1 == 10) {
+    if (count1 == 1) {
       this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
       this->dio_pin_->digital_write(LINE_LOW);
       count1 = 0;
