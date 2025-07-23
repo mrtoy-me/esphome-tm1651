@@ -187,6 +187,8 @@ bool TM1651Display::write_byte_(uint8_t data) {
   this->clk_pin_->digital_write(LINE_LOW);
   this->dio_pin_->digital_write(LINE_HIGH);
   this->clk_pin_->digital_write(LINE_HIGH);
+  delayMicroseconds(3);
+
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
   ack = (!this->dio_pin_->digital_read());
   if (!ack) {
