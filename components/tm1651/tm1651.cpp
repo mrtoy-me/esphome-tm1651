@@ -11,6 +11,7 @@ static const bool LINE_HIGH = true;
 static const bool LINE_LOW = false;
 
 // TM1651 maximum frequency is 500 kHz (duty ratio 50%) = 2 microseconds / cycle
+// choose appropriate clock cycle in microseconds
 static const uint8_t CLOCK_CYCLE = 8;
 
 static const uint8_t HALF_CLOCK_CYCLE = CLOCK_CYCLE / 2;
@@ -44,7 +45,12 @@ void TM1651Display::setup() {
   this->dio_pin_->setup();
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
+  // initialise brightness to TYPICAL
   this->brightness_ = TM1651_BRIGHTNESS_TYPICAL;
+
+  // initialised already
+  // display_on_ = true
+  // level_ = 0
 
   // clear display
   this->display_level_();
@@ -59,18 +65,22 @@ void TM1651Display::dump_config() {
 
 void TM1651Display::set_brightness(uint8_t new_brightness) {
   this->brightness_ = this->remap_brightness_(new_brightness);
-  if (this->display_on_) { this->update_brightness_(DISPLAY_ON); }
+  if (this->display_on_) {
+    // add for testing
+    this->display_level_();
+    this->update_brightness_(DISPLAY_ON);
+  }
 }
 
 void TM1651Display::set_level(uint8_t new_level) {
   if (new_level > MAX_DISPLAY_LEVELS) new_level = MAX_DISPLAY_LEVELS;
   this->level_ = new_level;
-  if (this->display_on_) { this->display_level_(); }
+  if (this->display_on_) this->display_level_();
 }
 
 void TM1651Display::set_level_percent(uint8_t percentage) {
   this->level_ = this->calculate_level_(percentage);
-  if (this->display_on_) { this->display_level_(); }
+  if (this->display_on_) this->display_level_();
 }
 
 void TM1651Display::turn_off() {
@@ -80,7 +90,7 @@ void TM1651Display::turn_off() {
 
 void TM1651Display::turn_on() {
   this->display_on_ = true;
-  // display level as it could have been changed when display turned off
+  // display level as level could have been changed when display turned off
   this->display_level_();
   this->update_brightness_(DISPLAY_ON);
 }
@@ -90,7 +100,8 @@ void TM1651Display::turn_on() {
 uint8_t TM1651Display::calculate_level_(uint8_t percentage) {
   if (percentage > PERCENT100) percentage = PERCENT100;
   // scale 0-100% to 0-7 display levels
-  // use integer arithmetic with rounding
+  // use integer arithmetic
+  // round before division by 100 percent
   uint16_t initial_scaling = (percentage * MAX_DISPLAY_LEVELS) + PERCENT50;
   return (uint8_t)(initial_scaling / PERCENT100);
 }
@@ -130,13 +141,13 @@ bool TM1651Display::write_byte_(uint8_t data) {
     data >>= 1;
   }
 
-  // start 9th cycle, setting DIO high and look for ack
+  // 9th cycle set DIO high, should get ack
   this->half_cycle_clock_low_(LINE_HIGH);
   return this->half_cycle_clock_high_ack_();
 }
 
 void TM1651Display::half_cycle_clock_low_(bool data_bit) {
-   // first half cycle, clock low and write data bit
+   // first half cycle when CLK low and write data bit
   this->clk_pin_->digital_write(LINE_LOW);
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
@@ -145,24 +156,24 @@ void TM1651Display::half_cycle_clock_low_(bool data_bit) {
 }
 
 void TM1651Display::half_cycle_clock_high_() {
-  // second half cycle, clock high
+  // second half cycle
   this->clk_pin_->digital_write(LINE_HIGH);
   delayMicroseconds(HALF_CLOCK_CYCLE);
 }
 
 bool TM1651Display::half_cycle_clock_high_ack_() {
-  // second half cycle, clock high and check for ack
+  // second half cycle when clock high, check for ack
   this->clk_pin_->digital_write(LINE_HIGH);
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-  // valid ack on DIO is low
+  // valid ack is low
   bool ack = (!this->dio_pin_->digital_read());
 
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
   // ack should be set DIO low by now
-  // if its not, set DIO low before the next cycle
+  // its not, set DIO low before the next cycle
   if (!ack) {
     this->dio_pin_->digital_write(LINE_LOW);
   }
