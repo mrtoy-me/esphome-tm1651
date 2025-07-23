@@ -16,6 +16,7 @@ static const uint8_t CLOCK_CYCLE = 8;
 
 static const uint8_t HALF_CLOCK_CYCLE = CLOCK_CYCLE / 2;
 static const uint8_t QUARTER_CLOCK_CYCLE = CLOCK_CYCLE / 4;
+static const uint8_t MAX_ACK_RETRIES = 10;
 
 static const uint8_t ADDR_FIXED = 0x44; // fixed address mode
 static const uint8_t ADDR_START = 0xC0; // address of the display register
@@ -235,25 +236,23 @@ bool TM1651Display::write_byte_(uint8_t data) {
 bool TM1651Display::half_cycle_clock_high_ack_() {
   // start second half cycle when clock is high and check for ack
   // returns ack if received = false, since ack is DIO low
-  uint8_t count1{0};
-  bool ack{true};
+  uint8_t retries{0};
+  bool ack{false};
   this->total_ =  this->total_ + 1;
   this->clk_pin_->digital_write(LINE_HIGH);
   delayMicroseconds(QUARTER_CLOCK_CYCLE);
 
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-
-  while (this->dio_pin_->digital_read()) {
-    count1 += 1;
-    if (count1 == 1) {
+  do {
+    ack = (!this->dio_pin_->digital_read());
+    retries += 1;
+    if (retries > MAX_ACK_RETRIES) {
       this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
       this->dio_pin_->digital_write(LINE_LOW);
-      count1 = 0;
       this->error_count_ = this->error_count_ + 1;
-      ack = false;
     }
-    //this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-  }
+  } while (!ack);
+
   this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
 
   // ack should be set DIO low by now
