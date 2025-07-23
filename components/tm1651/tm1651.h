@@ -15,8 +15,8 @@ enum TM1651Brightness : uint8_t {
 
 class TM1651Display : public Component {
  public:
-  void set_clk_pin(InternalGPIOPin *pin) { clk_pin_ = pin; }
-  void set_dio_pin(InternalGPIOPin *pin) { dio_pin_ = pin; }
+  void set_clk_pin(InternalGPIOPin* pin) { clk_pin_ = pin; }
+  void set_dio_pin(InternalGPIOPin* pin) { dio_pin_ = pin; }
 
   void setup() override;
   void dump_config() override;
@@ -49,8 +49,8 @@ class TM1651Display : public Component {
 
   void delineate_transmission_(bool dio_state);
 
-  InternalGPIOPin *clk_pin_;
-  InternalGPIOPin *dio_pin_;
+  InternalGPIOPin* clk_pin_;
+  InternalGPIOPin* dio_pin_;
 
   bool display_on_{true};
   uint8_t brightness_{};
