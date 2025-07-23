@@ -171,14 +171,14 @@ bool TM1651Display::write_byte_(uint8_t data) {
   this->total_ =  this->total_ + 1;
   for (i = 0; i < 8; i++) {
     this->clk_pin_->digital_write(LINE_LOW);
-    if (wr_data & 0x01) {
+    if (data & 0x01) {
       // LSB first
       this->dio_pin_->digital_write(LINE_HIGH);
     } else {
       this->dio_pin_->digital_write(LINE_LOW);
     }
     delayMicroseconds(3);
-    wr_data >>= 1;
+    data >>= 1;
     this->clk_pin_->digital_write(LINE_HIGH);
     delayMicroseconds(3);
   }
@@ -188,7 +188,7 @@ bool TM1651Display::write_byte_(uint8_t data) {
   this->dio_pin_->digital_write(LINE_HIGH);
   this->dio_pin_->digital_write(LINE_HIGH);
   this->dio_pin_->pin_mode(gpio::FLAG_INPUT);
-  while (his->dio_pin_->digital_read()) {
+  while (this->dio_pin_->digital_read()) {
     count1 += 1;
     if (count1 == 200) {
       this->dio_pin_->pin_mode(gpio::FLAG_OUTPUT);
