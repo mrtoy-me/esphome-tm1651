@@ -227,7 +227,7 @@ bool TM1651Display::write_byte_(uint8_t data) {
   // DIO set high, should get ack by DIO low
   this->half_cycle_clock_low_(LINE_HIGH);
   bool ack = this->half_cycle_clock_high_ack_();
-  if (!ack) ESP_LOGD(TAG, "ack not received %i from total %i", this->error_count_, this->total_);
+  //if (!ack) ESP_LOGD(TAG, "ack not received %i from total %i", this->error_count_, this->total_);
   // return true if ack low
   return ack;
 }
