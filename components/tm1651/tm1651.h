@@ -1,8 +1,8 @@
 #pragma once
 
-#include "esphome/core/automation.h"
 #include "esphome/core/component.h"
 #include "esphome/core/hal.h"
+#include "esphome/core/automation.h"
 
 namespace esphome {
 namespace tm1651 {
