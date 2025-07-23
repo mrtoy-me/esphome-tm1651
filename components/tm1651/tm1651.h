@@ -39,12 +39,6 @@ class TM1651Display : public Component {
   uint8_t remap_brightness_(uint8_t new_brightness);
   void update_brightness_(uint8_t on_off_control);
 
-  // low level functions
-  void delineate_transmission_(bool dio_state);
-  void half_cycle_clock_high_();
-  bool half_cycle_clock_high_ack_();
-  void half_cycle_clock_low_(bool data_bit);
-
   void start_();
   void stop_();
 
