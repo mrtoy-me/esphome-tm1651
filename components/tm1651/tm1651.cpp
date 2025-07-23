@@ -16,7 +16,7 @@ static const uint8_t CLOCK_CYCLE = 8;
 
 static const uint8_t HALF_CLOCK_CYCLE = CLOCK_CYCLE / 2;
 static const uint8_t QUARTER_CLOCK_CYCLE = CLOCK_CYCLE / 4;
-static const uint8_t MAX_ACK_RETRIES = 0;
+static const uint8_t MAX_ACK_RETRIES = 100;
 
 static const uint8_t ADDR_FIXED = 0x44; // fixed address mode
 static const uint8_t ADDR_START = 0xC0; // address of the display register
