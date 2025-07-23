@@ -29,6 +29,8 @@ class TM1651Display : public Component {
 
   void turn_off();
   void turn_on();
+  void reset_errors();
+  void show_errors();
 
  protected:
   uint8_t calculate_level_(uint8_t percentage);
@@ -38,23 +40,25 @@ class TM1651Display : public Component {
   void update_brightness_(uint8_t on_off_control);
 
   // low level functions
-  bool write_byte_(uint8_t data);
-
-  void half_cycle_clock_low_(bool data_bit);
+  void delineate_transmission_(bool dio_state);
   void half_cycle_clock_high_();
   bool half_cycle_clock_high_ack_();
+  void half_cycle_clock_low_(bool data_bit);
 
   void start_();
   void stop_();
 
-  void delineate_transmission_(bool dio_state);
+  bool write_byte_(uint8_t data);
 
   InternalGPIOPin* clk_pin_;
   InternalGPIOPin* dio_pin_;
 
   bool display_on_{true};
+
   uint8_t brightness_{};
   uint8_t level_{0};
+  uint32_t error_count_{0};
+  uint32_t total_{0};
 };
 
 template<typename... Ts> class SetBrightnessAction : public Action<Ts...>, public Parented<TM1651Display> {
