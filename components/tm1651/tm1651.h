@@ -2,7 +2,6 @@
 
 #include "esphome/core/automation.h"
 #include "esphome/core/component.h"
-#include "esphome/core/hal.h"
 
 namespace esphome {
 namespace tm1651 {
